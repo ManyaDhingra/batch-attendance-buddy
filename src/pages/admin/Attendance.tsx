@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useData } from "@/context/DataContext";
 import { Layout } from "@/components/Layout";
@@ -9,9 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { Check, X } from "lucide-react";
+import { Wifi, WifiOff, Clock, X } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useSearchParams } from "react-router-dom";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { AttendanceStatus } from "@/types";
 
 const AttendancePage = () => {
   const { toast } = useToast();
@@ -23,7 +24,7 @@ const AttendancePage = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedBatchId, setSelectedBatchId] = useState<string>(urlBatchId || "");
   const [selectedSubBatchId, setSelectedSubBatchId] = useState<string>("");
-  const [attendance, setAttendance] = useState<Record<string, 'present' | 'absent'>>({});
+  const [attendance, setAttendance] = useState<Record<string, AttendanceStatus>>({});
   
   const selectedBatch = batches.find(batch => batch.id === selectedBatchId);
   const selectedSubBatch = selectedBatchId && selectedSubBatchId
@@ -36,7 +37,6 @@ const AttendancePage = () => {
     ? students.filter(student => selectedBatch.students.includes(student.id))
     : [];
   
-  // Check if attendance has already been recorded for this date and batch/subBatch
   const existingAttendanceRecord = selectedBatchId && selectedSubBatchId
     ? attendanceRecords.find(
         record => 
@@ -46,10 +46,9 @@ const AttendancePage = () => {
       )
     : null;
   
-  // Initialize attendance status when batch or subBatch changes
   useState(() => {
     if (existingAttendanceRecord) {
-      const existingAttendance: Record<string, 'present' | 'absent'> = {};
+      const existingAttendance: Record<string, AttendanceStatus> = {};
       existingAttendanceRecord.records.forEach(record => {
         existingAttendance[record.studentId] = record.status;
       });
@@ -59,15 +58,28 @@ const AttendancePage = () => {
     }
   });
 
-  // Handle attendance status change
-  const handleAttendanceChange = (studentId: string, status: 'present' | 'absent') => {
+  const handleAttendanceChange = (studentId: string, status: AttendanceStatus) => {
     setAttendance(prev => ({
       ...prev,
       [studentId]: status,
     }));
   };
 
-  // Handle submission of attendance
+  const getStatusIcon = (status: AttendanceStatus) => {
+    switch (status) {
+      case 'online':
+        return <Wifi className="h-4 w-4 text-green-500" />;
+      case 'offline':
+        return <WifiOff className="h-4 w-4 text-yellow-500" />;
+      case 'late':
+        return <Clock className="h-4 w-4 text-orange-500" />;
+      case 'absent':
+        return <X className="h-4 w-4 text-red-500" />;
+      default:
+        return null;
+    }
+  };
+
   const handleSubmit = () => {
     if (!selectedBatchId || !selectedSubBatchId || !selectedDate) {
       toast({
@@ -78,13 +90,11 @@ const AttendancePage = () => {
       return;
     }
 
-    // Format attendance data
     const records = batchStudents.map(student => ({
       studentId: student.id,
       status: attendance[student.id] || 'absent',
     }));
 
-    // Check if attendance for this date, batch, and subBatch exists
     if (existingAttendanceRecord) {
       toast({
         title: "Info",
@@ -93,7 +103,6 @@ const AttendancePage = () => {
       return;
     }
 
-    // Record attendance
     recordAttendance({
       batchId: selectedBatchId,
       subBatchId: selectedSubBatchId,
@@ -199,29 +208,43 @@ const AttendancePage = () => {
                         batchStudents.length > 0 ? (
                           <div className="space-y-4 mt-4">
                             {batchStudents.map(student => (
-                              <div key={student.id} className="flex items-center justify-between">
+                              <div key={student.id} className="space-y-2">
                                 <div>
                                   <p className="font-medium">{student.name}</p>
                                   <p className="text-sm text-muted-foreground">{student.studentId}</p>
                                 </div>
-                                <div className="flex gap-2">
-                                  <Button
-                                    variant={attendance[student.id] === 'present' ? 'default' : 'outline'}
-                                    size="sm"
-                                    className={attendance[student.id] === 'present' ? 'bg-attendance-present hover:bg-attendance-present/90' : ''}
-                                    onClick={() => handleAttendanceChange(student.id, 'present')}
-                                  >
-                                    <Check className="h-4 w-4 mr-1" /> Present
-                                  </Button>
-                                  <Button
-                                    variant={attendance[student.id] === 'absent' ? 'default' : 'outline'}
-                                    size="sm"
-                                    className={attendance[student.id] === 'absent' ? 'bg-attendance-absent hover:bg-attendance-absent/90' : ''}
-                                    onClick={() => handleAttendanceChange(student.id, 'absent')}
-                                  >
-                                    <X className="h-4 w-4 mr-1" /> Absent
-                                  </Button>
-                                </div>
+                                <RadioGroup
+                                  value={attendance[student.id] || 'absent'}
+                                  onValueChange={(value: AttendanceStatus) => 
+                                    handleAttendanceChange(student.id, value)
+                                  }
+                                  className="flex flex-wrap gap-4"
+                                >
+                                  <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="online" id={`online-${student.id}`} />
+                                    <Label htmlFor={`online-${student.id}`} className="flex items-center">
+                                      <Wifi className="h-4 w-4 mr-1 text-green-500" /> Online
+                                    </Label>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="offline" id={`offline-${student.id}`} />
+                                    <Label htmlFor={`offline-${student.id}`} className="flex items-center">
+                                      <WifiOff className="h-4 w-4 mr-1 text-yellow-500" /> Offline
+                                    </Label>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="late" id={`late-${student.id}`} />
+                                    <Label htmlFor={`late-${student.id}`} className="flex items-center">
+                                      <Clock className="h-4 w-4 mr-1 text-orange-500" /> Late
+                                    </Label>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="absent" id={`absent-${student.id}`} />
+                                    <Label htmlFor={`absent-${student.id}`} className="flex items-center">
+                                      <X className="h-4 w-4 mr-1 text-red-500" /> Absent
+                                    </Label>
+                                  </div>
+                                </RadioGroup>
                               </div>
                             ))}
                             
@@ -260,7 +283,7 @@ const AttendancePage = () => {
                     {attendanceRecords.slice().reverse().map((record) => {
                       const batch = batches.find(b => b.id === record.batchId);
                       const subBatch = batch?.subBatches.find(sb => sb.id === record.subBatchId);
-                      const presentCount = record.records.filter(r => r.status === 'present').length;
+                      const onlineCount = record.records.filter(r => r.status === 'online').length;
                       const totalCount = record.records.length;
                       
                       return (
@@ -274,12 +297,12 @@ const AttendancePage = () => {
                             </div>
                             <div className="text-right">
                               <p className="font-medium">
-                                {presentCount}/{totalCount} Present
+                                {onlineCount}/{totalCount} Online
                               </p>
                               <div className="w-24 h-2 bg-muted rounded-full overflow-hidden mt-1">
                                 <div 
-                                  className="h-full bg-attendance-present" 
-                                  style={{ width: `${(presentCount / totalCount) * 100}%` }}
+                                  className="h-full bg-green-500" 
+                                  style={{ width: `${(onlineCount / totalCount) * 100}%` }}
                                 ></div>
                               </div>
                             </div>

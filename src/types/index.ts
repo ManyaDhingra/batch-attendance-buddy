@@ -1,4 +1,3 @@
-
 export type UserRole = 'admin' | 'student';
 
 export interface User {
@@ -34,6 +33,8 @@ export interface SubBatch {
   students: string[];
 }
 
+export type AttendanceStatus = 'online' | 'offline' | 'late' | 'absent';
+
 export interface AttendanceRecord {
   id: string;
   batchId: string;
@@ -41,7 +42,7 @@ export interface AttendanceRecord {
   date: Date;
   records: {
     studentId: string;
-    status: 'present' | 'absent';
+    status: AttendanceStatus;
   }[];
 }
 

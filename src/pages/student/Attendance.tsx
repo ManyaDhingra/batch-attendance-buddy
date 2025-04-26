@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useData } from "@/context/DataContext";
@@ -9,8 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
-import { Check, X } from "lucide-react";
-import { Student } from "@/types";
+import { Check, X, Wifi, WifiOff, Clock } from "lucide-react";
+import { Student, AttendanceStatus } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const StudentAttendancePage = () => {
@@ -22,6 +21,34 @@ const StudentAttendancePage = () => {
   
   const [selectedBatchId, setSelectedBatchId] = useState<string>("");
   const [selectedMonth, setSelectedMonth] = useState<Date | undefined>(new Date());
+  
+  const getStatusIcon = (status: AttendanceStatus) => {
+    switch (status) {
+      case 'online':
+        return <Wifi className="text-green-500" />;
+      case 'offline':
+        return <WifiOff className="text-yellow-500" />;
+      case 'late':
+        return <Clock className="text-orange-500" />;
+      case 'absent':
+        return <X className="text-red-500" />;
+      default:
+        return null;
+    }
+  };
+
+  const getStatusColor = (status: AttendanceStatus) => {
+    switch (status) {
+      case 'online':
+        return 'bg-green-500/10 text-green-500';
+      case 'offline':
+        return 'bg-yellow-500/10 text-yellow-500';
+      case 'late':
+        return 'bg-orange-500/10 text-orange-500';
+      case 'absent':
+        return 'bg-red-500/10 text-red-500';
+    }
+  };
   
   // Filter attendance by selected batch
   const filteredAttendance = selectedBatchId
@@ -52,7 +79,7 @@ const StudentAttendancePage = () => {
       );
       
       if (studentRecord) {
-        if (studentRecord.status === 'present') {
+        if (studentRecord.status === 'online' || studentRecord.status === 'offline' || studentRecord.status === 'late') {
           return { ...acc, present: acc.present + 1 };
         } else {
           return { ...acc, absent: acc.absent + 1 };
@@ -209,27 +236,19 @@ const StudentAttendancePage = () => {
                                 </TableCell>
                                 <TableCell>{batch?.name}</TableCell>
                                 <TableCell>{subBatch?.name}</TableCell>
-                                <TableCell className="text-right">
-                                  <span
-                                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                      studentRecord.status === 'present'
-                                        ? 'bg-attendance-present/10 text-attendance-present'
-                                        : 'bg-attendance-absent/10 text-attendance-absent'
-                                    }`}
-                                  >
-                                    {studentRecord.status === 'present' ? (
-                                      <>
-                                        <Check className="mr-1 h-3 w-3" />
-                                        Present
-                                      </>
-                                    ) : (
-                                      <>
-                                        <X className="mr-1 h-3 w-3" />
-                                        Absent
-                                      </>
-                                    )}
-                                  </span>
-                                </TableCell>
+                                
+                                  
+                                  <TableCell className="text-right">
+                                    <span
+                                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                        getStatusColor(studentRecord.status)
+                                      }`}
+                                    >
+                                      {getStatusIcon(studentRecord.status)}
+                                      <span className="ml-1 capitalize">{studentRecord.status}</span>
+                                    </span>
+                                  </TableCell>
+                                
                               </TableRow>
                             );
                           })
@@ -281,8 +300,12 @@ const StudentAttendancePage = () => {
                         {status && (
                           <div 
                             className={`mt-auto self-end rounded-full w-3 h-3 ${
-                              status === 'present' 
+                              status === 'online' 
                                 ? 'bg-attendance-present' 
+                                : status === 'offline'
+                                ? 'bg-attendance-pending'
+                                : status === 'late'
+                                ? 'bg-orange-500'
                                 : 'bg-attendance-absent'
                             }`}
                           ></div>
