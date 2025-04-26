@@ -7,19 +7,19 @@ import { useToast } from "@/components/ui/use-toast";
 const INITIAL_BATCHES: Batch[] = [
   {
     id: 'batch-1',
-    name: 'Web Development Bootcamp',
+    name: 'Morning Shift',
     description: 'Intensive web development training',
     subBatches: [
       {
         id: 'sub-batch-1',
-        name: 'Frontend Group',
-        description: 'Focus on React, HTML, CSS',
+        name: 'Maths',
+        description: '1234',
         students: ['student-1', 'student-2'],
       },
       {
         id: 'sub-batch-2',
-        name: 'Backend Group',
-        description: 'Focus on Node.js, Express, MongoDB',
+        name: 'English',
+        description: '1234',
         students: ['student-1'],
       },
     ],
@@ -55,7 +55,7 @@ const INITIAL_ATTENDANCE: AttendanceRecord[] = [
     date: new Date('2023-01-15'),
     records: [
       { studentId: 'student-1', status: 'online' },
-      { studentId: 'student-2', status: 'absent' },
+      { studentId: 'student-2', status: 'offline' },
     ],
   },
   {
