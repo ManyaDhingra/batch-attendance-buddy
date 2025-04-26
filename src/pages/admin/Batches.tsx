@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Plus, Trash } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 
 const BatchesPage = () => {
   const { batches, addBatch, deleteBatch } = useData();
@@ -38,21 +39,37 @@ const BatchesPage = () => {
   };
 
   const handleSubmit = () => {
-    addBatch({
-      name,
-      description,
-      subBatches: subBatches.map(sb => ({
-        ...sb,
-        students: []
-      })),
-      students: []
-    });
+    console.log("Form submitted. Name:", name, "Description:", description, "SubBatches:", subBatches);
     
-    // Reset form and close dialog
-    setName("");
-    setDescription("");
-    setSubBatches([{ id: `sub-${Date.now()}`, name: "", description: "" }]);
-    setOpen(false);
+    try {
+      addBatch({
+        name,
+        description,
+        subBatches: subBatches.map(sb => ({
+          ...sb,
+          students: []
+        })),
+        students: []
+      });
+      
+      // Reset form and close dialog
+      setName("");
+      setDescription("");
+      setSubBatches([{ id: `sub-${Date.now()}`, name: "", description: "" }]);
+      setOpen(false);
+      
+      toast({
+        title: "Batch created",
+        description: `Batch "${name}" has been created successfully`,
+      });
+    } catch (error) {
+      console.error("Error adding batch:", error);
+      toast({
+        title: "Error creating batch",
+        description: "There was a problem creating your batch",
+        variant: "destructive",
+      });
+    }
   };
 
   console.log("Rendering BatchesPage, batches:", batches);

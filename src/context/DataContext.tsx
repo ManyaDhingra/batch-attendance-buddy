@@ -54,8 +54,8 @@ const INITIAL_ATTENDANCE: AttendanceRecord[] = [
     subBatchId: 'sub-batch-1',
     date: new Date('2023-01-15'),
     records: [
-      { studentId: 'student-1', status: 'present' as const },
-      { studentId: 'student-2', status: 'absent' as const },
+      { studentId: 'student-1', status: 'online' },
+      { studentId: 'student-2', status: 'absent' },
     ],
   },
   {
@@ -64,7 +64,7 @@ const INITIAL_ATTENDANCE: AttendanceRecord[] = [
     subBatchId: 'sub-batch-2',
     date: new Date('2023-01-15'),
     records: [
-      { studentId: 'student-1', status: 'present' as const },
+      { studentId: 'student-1', status: 'online' },
     ],
   },
 ];
@@ -99,13 +99,20 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
 
   const addBatch = useCallback((batchData: Omit<Batch, 'id' | 'createdAt'>) => {
+    console.log("Adding batch:", batchData); // Debug log
+    
     const newBatch: Batch = {
       ...batchData,
       id: `batch-${Date.now()}`,
       createdAt: new Date(),
     };
     
-    setBatches(prev => [...prev, newBatch]);
+    setBatches(prev => {
+      const updatedBatches = [...prev, newBatch];
+      console.log("Updated batches:", updatedBatches); // Debug log
+      return updatedBatches;
+    });
+    
     toast({
       title: "Success",
       description: `Batch "${newBatch.name}" has been created`,
