@@ -9,10 +9,10 @@ const Index = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
       <div className="max-w-3xl text-center space-y-6">
         <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl">
-          Batch Attendance Buddy
+          Learning Management System
         </h1>
         <p className="text-xl text-muted-foreground">
-          A comprehensive solution for managing student attendance across batches and sub-batches.
+          A comprehensive solution for managing student across all domains
         </p>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
           <Button size="lg" onClick={() => navigate("/login")}>
