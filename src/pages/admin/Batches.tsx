@@ -55,6 +55,8 @@ const BatchesPage = () => {
     setOpen(false);
   };
 
+  console.log("Rendering BatchesPage, batches:", batches);
+
   return (
     <Layout requireAuth requireAdmin>
       <div className="space-y-6">
@@ -68,7 +70,7 @@ const BatchesPage = () => {
           
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="bg-primary">
                 <Plus className="mr-2 h-4 w-4" /> Add Batch
               </Button>
             </DialogTrigger>
