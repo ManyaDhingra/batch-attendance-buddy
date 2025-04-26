@@ -36,7 +36,7 @@ const AdminDashboard = () => {
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Admin Dashboard</h2>
           <p className="text-muted-foreground">
-            Welcome to the Attendance Buddy admin dashboard.
+            Welcome to admin dashboard.
           </p>
         </div>
 
